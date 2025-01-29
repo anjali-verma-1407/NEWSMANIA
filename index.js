@@ -1,22 +1,18 @@
-const API_KEY="2a5e0d17e0fd4bf39cc367998e2b0f41";
-const url = "https://newsapi.org/v2/top-headlines?country=in&apiKey=";
-
+const API_KEY = "3c53db46aecc1ab797c8f6dd533c2da2";
+const BASE_URL = "https://gnews.io/api/v4/search?lang=en&country=in&max=10&apikey=";
 
 window.addEventListener("load", () => fetchNews("India"));
 
-function reload() {
-    window.location.reload();
-}
-
 async function fetchNews(query) {
     try {
-        const res = await fetch(`${url}${query}&apiKey=${API_KEY}`);
+        const res = await fetch(`${BASE_URL}${API_KEY}&q=${query}`);
         const data = await res.json();
-
         console.log("API Response:", data); // Debugging
 
-        if (!data.articles || !Array.isArray(data.articles)) {
-            throw new Error("No valid articles found in API response.");
+        if (!data.articles || data.articles.length === 0) {
+            console.error("No articles found.");
+            document.getElementById("cards-container").innerHTML = "<p>No news found. Try a different search.</p>";
+            return;
         }
 
         bindData(data.articles);
@@ -24,7 +20,6 @@ async function fetchNews(query) {
         console.error("Error fetching news:", error);
     }
 }
-
 
 function bindData(articles) {
     const cardsContainer = document.getElementById("cards-container");
@@ -56,7 +51,7 @@ function fillDataInCard(cardClone, article) {
 
     newsSource.innerHTML = `${article.source.name} · ${date}`;
 
-    cardClone.firstElementChild.addEventListener("click", () => {
+    cardClone.querySelector(".news-card").addEventListener("click", () => {
         window.open(article.url, "_blank");
     });
 }
@@ -65,6 +60,8 @@ let curSelectedNav = null;
 function onNavItemClick(id) {
     fetchNews(id);
     const navItem = document.getElementById(id);
+    if (!navItem) return;
+
     curSelectedNav?.classList.remove("active");
     curSelectedNav = navItem;
     curSelectedNav.classList.add("active");
@@ -80,4 +77,3 @@ searchButton.addEventListener("click", () => {
     curSelectedNav?.classList.remove("active");
     curSelectedNav = null;
 });
-
